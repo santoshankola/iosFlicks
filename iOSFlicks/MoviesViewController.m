@@ -18,6 +18,9 @@
 @property (strong, nonatomic) UISearchController *searchController;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+
+
 
 @end
 
@@ -29,12 +32,11 @@
     
     /*Search related*/
     self.searchBar.delegate = self;
-
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     self.filteredData = self.movies;
     
-    
+    [self.collectionView setHidden:YES];
     
     NSString *baseMovieUrl = @"https://api.themoviedb.org/3/movie/";
     NSString *apiKey = @"?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed";
@@ -85,6 +87,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
+
    // NSDictionary *movie = self.movies[indexPath.row];
     NSDictionary *movie = self.filteredData[indexPath.row];
     
@@ -100,7 +103,29 @@
     return cell;
 }
 
+-(void) searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+ 
+    
+    if([searchText length] == 0)
+    {
+        self.filteredData = self.movies;
+    }
+    else
+    {
+        NSLog(@"%@", searchText);
+        self.filteredData = [self.movies filteredArrayUsingPredicate:
+                               [NSPredicate predicateWithFormat:@"%K CONTAINS %@", @"title",searchText]];
+    }
+    [self.tableView reloadData];
 
+}
+
+- (void)finishFetching:(id)sender {
+    //    [ProgressHUD dismiss];
+    if (sender) {
+        [(UIRefreshControl *)sender endRefreshing];
+    }
+}
 
 
 
